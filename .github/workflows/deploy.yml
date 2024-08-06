@@ -13,16 +13,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install Node.js
-      uses: actions/setup-node@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        node-version: '16'
+        python-version: '3.12'
 
     - name: Install dependencies
-      run: npm install
-
-    - name: Build
-      run: npm run build
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Install Netlify CLI
       run: npm install -g netlify-cli
@@ -32,4 +31,4 @@ jobs:
         NETLIFY_AUTH_TOKEN: nfp_pdZBuA6UwyYFkp3WUfxLdbrevaQK3LhZba47
         NETLIFY_SITE_ID: c9eaf719-7b68-4937-9fc2-5d03bcec3155
       run: |
-        netlify deploy --prod --dir=build --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN
+        netlify deploy --prod --dir=build --site c9eaf719-7b68-4937-9fc2-5d03bcec3155 --auth nfp_pdZBuA6UwyYFkp3WUfxLdbrevaQK3LhZba47
