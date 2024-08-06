@@ -1,0 +1,37 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # Adjust based on your runtime.txt
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Heroku CLI
+      run: |
+        curl https://cli-assets.heroku.com/install.sh | sh
+        heroku --version
+
+    - name: Deploy to Heroku
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        # HRKU-6158b431-e580-46bf-8176-4bc440506e34
+      run: |
+        heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+        git push heroku main
