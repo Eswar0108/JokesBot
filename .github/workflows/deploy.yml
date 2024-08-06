@@ -30,8 +30,8 @@ jobs:
 
     - name: Deploy to Heroku
       env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        HEROKU_API_KEY: HRKU-6158b431-e580-46bf-8176-4bc440506e34
         # HRKU-6158b431-e580-46bf-8176-4bc440506e34
       run: |
-        heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+        heroku git:remote -a automated-app
         git push heroku main
