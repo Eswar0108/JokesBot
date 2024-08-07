@@ -252,4 +252,4 @@ if __name__ == "__main__":
         if joke:
             post_tweets(clients, [joke])
         logging.info(f"Joke processed: {joke}")
-        time.sleep(3600)  # Wait an hour before the next iteration
+        time.sleep(10)  # Wait an hour before the next iteration
