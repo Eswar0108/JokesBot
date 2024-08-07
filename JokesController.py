@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 
 # List of credentials for each account
 accounts = [
- {
+    {
         'api_key': 'lHfKp2CUZI5p1NT8R1NtS4IS3',
         'api_secret': 'Zwfp6di94AkIQevsM02jk7cFV3r7B7YtvT5tAlCNMwmzGtd46s',
         'bearer_token': 'AAAAAAAAAAAAAAAAAAAAAMh5tQEAAAAA0XUYm6dvR86wYxZVeZnvJwifcmk%3DpIVfhzA0kiyFHqMnClRNA5yJeTI7gOKKUjQssPDKT0dHBjloZ2',
@@ -27,24 +27,49 @@ reset_time = {account['email']: datetime.now() + timedelta(days=1) for account i
 # Twitter's maximum character limit for a tweet
 MAX_TWEET_LENGTH = 280
 
-# Function to fetch jokes from JokeAPI
-def get_joke():
-    JOKE_API_URL = 'https://v2.jokeapi.dev/joke/Any'
+# Function to fetch jokes from JokeAPI (safe mode)
+def get_joke_from_jokeapi():
+    JOKE_API_URL = 'https://v2.jokeapi.dev/joke/Any?format=txt&safe-mode'
     try:
         response = requests.get(JOKE_API_URL)
-        data = response.json()
-        # Check the flags for the joke
-        flags = data['flags']
-        if flags['racist'] or flags['sexist'] or flags['religious']:
-            return None  # Skip jokes with any of these flags set to true
-
-        if data['type'] == 'single':
-            return data['joke']
-        else:
-            return f"{data['setup']} - {data['delivery']}"
+        joke = response.text.strip()
+        if len(joke) > MAX_TWEET_LENGTH:
+            return None
+        return joke
     except ConnectionError:
         print("Failed to connect to JokeAPI")
         return None
+
+# Function to fetch jokes from pyjokes
+def get_joke_from_pyjokes():
+    import pyjokes
+    try:
+        joke = pyjokes.get_joke()
+        if len(joke) > MAX_TWEET_LENGTH:
+            return None
+        return joke
+    except Exception as e:
+        print(f"Failed to get joke from pyjokes: {e}")
+        return None
+
+# Function to fetch jokes from Official Joke API
+def get_joke_from_official_joke_api():
+    JOKE_API_URL = 'https://official-joke-api.appspot.com/random_joke'
+    try:
+        response = requests.get(JOKE_API_URL)
+        data = response.json()
+        joke = f"{data['setup']} - {data['punchline']}"
+        if len(joke) > MAX_TWEET_LENGTH:
+            return None
+        return joke
+    except ConnectionError:
+        print("Failed to connect to Official Joke API")
+        return None
+
+# Round-robin fetching of jokes
+def get_joke(round_robin_counter):
+    fetchers = [get_joke_from_jokeapi, get_joke_from_pyjokes, get_joke_from_official_joke_api]
+    return fetchers[round_robin_counter % len(fetchers)]()
 
 # Function to create tweepy client for each account
 def create_clients(accounts):
@@ -132,14 +157,12 @@ def post_tweets(clients, tweets):
 clients = create_clients(accounts)
 
 # Fetch jokes and post the tweets
-tweets = []
+round_robin_counter = 0
 while True:
-    joke = get_joke()
+    joke = get_joke(round_robin_counter)
+    round_robin_counter += 1
     if joke:
-        tweets.append(joke)
-        post_tweets(clients, tweets)
+        post_tweets(clients, [joke])
     print("joke, Completed", joke)
-# Post the tweets
-# post_tweets(clients, tweets)
 
 print("Completed")
