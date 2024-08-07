@@ -1,13 +1,10 @@
 import nltk
-from textblob import download_corpora
+from textblob import TextBlob
 
 # Download necessary NLTK corpora
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('brown')
-
-# Download necessary TextBlob corpora
-download_corpora.download()
 
 # Rest of your imports and code...
 import tweepy
@@ -16,18 +13,13 @@ import requests
 import random
 from datetime import datetime, timedelta
 from requests.exceptions import ConnectionError
-from textblob import TextBlob
 import pyjokes
 from PIL import Image, ImageDraw, ImageFont
 import io
-
-# Your existing code continues here...
+import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-nltk.download('punkt')
-nltk.download('stopwords')
 
 # List of credentials for each account
 accounts = [
@@ -63,7 +55,6 @@ def get_joke_from_jokeapi():
         return None
 
 def get_joke_from_pyjokes():
-    import pyjokes
     try:
         joke = pyjokes.get_joke()
         if len(joke) > MAX_TWEET_LENGTH:
@@ -92,7 +83,7 @@ def get_joke(round_robin_counter):
     
     if joke:
         sentiment = TextBlob(joke).sentiment
-        keywords = [word for word in TextBlob(joke).noun_phrases if word.lower() not in stopwords.words('english')]
+        keywords = [word for word in TextBlob(joke).noun_phrases if word.lower() not in nltk.corpus.stopwords.words('english')]
         
         if sentiment.polarity > 0.5:
             emojis = ["😂", "🤣", "😆"]
