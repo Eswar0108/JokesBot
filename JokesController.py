@@ -114,7 +114,13 @@ def create_joke_image(joke_text):
     except IOError:
         font = ImageFont.load_default()
 
-    text_width, text_height = draw.textsize(joke_text, font=font)
+    try:
+        # For Pillow 8.0.0 and above
+        text_width, text_height = draw.textbbox((0, 0), joke_text, font=font)[2:]
+    except AttributeError:
+        # For older Pillow versions
+        text_width, text_height = draw.textsize(joke_text, font=font)
+
     text_x = (800 - text_width) / 2
     text_y = (400 - text_height) / 2
     draw.text((text_x, text_y), joke_text, fill='black', font=font)
