@@ -4,3 +4,4 @@ tweepy
 pyjokes
 Pillow
 requests
+requests_oauthlib

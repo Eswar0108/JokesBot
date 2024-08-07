@@ -17,6 +17,7 @@ import pyjokes
 from PIL import Image, ImageDraw, ImageFont
 import io
 import logging
+from requests_oauthlib import OAuth1
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -154,6 +155,23 @@ def can_tweet(account_email):
 def is_tweet_length_valid(text):
     return len(text) <= MAX_TWEET_LENGTH
 
+from requests_oauthlib import OAuth1
+
+def upload_media_to_twitter(consumer_key, consumer_secret, access_token, access_token_secret, media_stream):
+    url = 'https://upload.twitter.com/1.1/media/upload.json'
+    
+    # OAuth authentication
+    auth = OAuth1(consumer_key, consumer_secret, access_token, access_token_secret)
+
+    response = requests.post(url, files={'media': media_stream}, auth=auth)
+    
+    response_data = response.json()
+    if response.status_code == 200:
+        return response_data.get('media_id_string')
+    else:
+        logging.error(f"Failed to upload media. Status code: {response.status_code}, Response: {response_data}")
+        return None
+
 def create_tweet(client, account, text, media=None):
     if not can_tweet(account['email']):
         logging.info(f"Daily limit reached for account: {account['channel_name']}. Waiting for reset.")
@@ -169,8 +187,17 @@ def create_tweet(client, account, text, media=None):
         try:
             if media:
                 # Upload media
-                media_id = client.media_upload(filename=media).media_id
-                response = client.create_tweet(text=text, media_ids=[media_id])
+                media_id = upload_media_to_twitter(
+                    account['api_key'],
+                    account['api_secret'],
+                    account['access_token'],
+                    account['access_token_secret'],
+                    media
+                )
+                if media_id:
+                    response = client.create_tweet(text=text, media_ids=[media_id])
+                else:
+                    response = client.create_tweet(text=text)
             else:
                 response = client.create_tweet(text=text)
                 
