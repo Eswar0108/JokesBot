@@ -7,18 +7,21 @@ nltk.download('stopwords')
 nltk.download('brown')
 
 # Download necessary TextBlob corpora
-download_corpora()
-import logging
+download_corpora.download()
+
+# Rest of your imports and code...
 import tweepy
 import time
 import requests
+import random
 from datetime import datetime, timedelta
 from requests.exceptions import ConnectionError
 from textblob import TextBlob
-import nltk
-from nltk.corpus import stopwords
+import pyjokes
 from PIL import Image, ImageDraw, ImageFont
 import io
+
+# Your existing code continues here...
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
