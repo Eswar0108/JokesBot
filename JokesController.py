@@ -168,7 +168,7 @@ def create_tweet(client, account, text, media=None):
     while retries > 0:
         try:
             if media:
-                media_id = client.upload_media(media)
+                media_id = client.media_upload(media).media_id
                 response = client.create_tweet(text=text, media_ids=[media_id])
             else:
                 response = client.create_tweet(text=text)
