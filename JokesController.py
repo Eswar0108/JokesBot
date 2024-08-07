@@ -1,3 +1,13 @@
+import nltk
+from textblob import download_corpora
+
+# Download necessary NLTK corpora
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('brown')
+
+# Download necessary TextBlob corpora
+download_corpora()
 import logging
 import tweepy
 import time
